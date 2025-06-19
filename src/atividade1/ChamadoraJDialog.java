@@ -3,132 +3,117 @@ package atividade1;
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * JDialog responsável por exibir as perguntas do quiz ao usuário.
+ * Apresenta perguntas com múltipla escolha e avalia respostas.
+ */
 public class ChamadoraJDialog extends JDialog {
 
-    private JLabel labelPergunta;
-    private JRadioButton[] opcoes;
-    private ButtonGroup grupoOpcoes;
-    private JButton btnAvaliar, btnProxima;
-    private int questaoAtual = 0;
-    private int acertos = 0;
-    private boolean respostaAvaliada = false;
+	private JLabel labelPergunta;
+	private JRadioButton[] opcoes;
+	private ButtonGroup grupoOpcoes;
+	private JButton btnAvaliar, btnProxima;
+	private int questaoAtual = 0;
+	private int acertos = 0;
+	private boolean respostaAvaliada = false;
 
-    private JanelaPrincipalQuiz janelaPrincipal;
+	private JanelaPrincipalQuiz janelaPrincipal;
 
-    public ChamadoraJDialog(JanelaPrincipalQuiz parent) {
-        super(parent, "Quiz", true);
-        this.janelaPrincipal = parent;
+	//Construtor da janela de diálogo do quiz.
+	public ChamadoraJDialog(JanelaPrincipalQuiz parent) {
+		super(parent, "Quiz", true);
+		this.janelaPrincipal = parent;
 
-        setSize(500, 400);
-        setLayout(null); 
-        setLocationRelativeTo(parent);
+		setSize(500, 400);
+		setLayout(null); 
+		setLocationRelativeTo(parent);
 
-        initComponents();
-        carregarQuestao();
-    }
+		initComponents();
+		carregarQuestao();
+	}
 
-    private void initComponents() {
-        labelPergunta = new JLabel();
-        labelPergunta.setBounds(30, 20, 440, 30);
-        add(labelPergunta);
+	//Inicializa os componentes da interface do diálogo.
+	private void initComponents() {
+		// Título da pergunta
+		labelPergunta = new JLabel();
+		labelPergunta.setBounds(30, 20, 440, 30);
+		add(labelPergunta);
 
-        grupoOpcoes = new ButtonGroup();
-        opcoes = new JRadioButton[5];
+		grupoOpcoes = new ButtonGroup();
+		opcoes = new JRadioButton[5];
 
-        for (int i = 0; i < 5; i++) {
-            opcoes[i] = new JRadioButton();
-            opcoes[i].setBounds(30, 60 + i * 40, 400, 30);
-            grupoOpcoes.add(opcoes[i]);
-            add(opcoes[i]);
-        }
+		// Criando opções de resposta
+		for (int i = 0; i < 5; i++) {
+			opcoes[i] = new JRadioButton();
+			opcoes[i].setBounds(30, 60 + (i * 30), 400, 25);
+			grupoOpcoes.add(opcoes[i]);
+			add(opcoes[i]);
+		}
 
-        btnAvaliar = new JButton("Avaliar Resposta");
-        btnAvaliar.setBounds(80, 280, 150, 30);
-        add(btnAvaliar);
+		// Botão para avaliar a resposta
+		btnAvaliar = new JButton("Avaliar");
+		btnAvaliar.setBounds(100, 250, 120, 30);
+		btnAvaliar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				avaliarResposta();
+			}
+		});
+		add(btnAvaliar);
 
-        btnProxima = new JButton("Próxima Questão");
-        btnProxima.setBounds(250, 280, 150, 30);
-        add(btnProxima);
+		// Botão para ir à próxima pergunta
+		btnProxima = new JButton("Próxima");
+		btnProxima.setBounds(260, 250, 120, 30);
+		btnProxima.setEnabled(false);
+		btnProxima.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				proximaQuestao();
+			}
+		});
+		add(btnProxima);
+	}
 
-        btnAvaliar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                avaliarResposta();
-            }
-        });
+	//Carrega a pergunta atual na interface.
+	private void carregarQuestao() {
+		// Exemplo fictício — apenas para fins de interface
+		labelPergunta.setText("Pergunta " + (questaoAtual + 1) + ": Qual é a resposta correta?");
+		for (int i = 0; i < opcoes.length; i++) {
+			opcoes[i].setText("Alternativa " + (char) ('A' + i));
+			opcoes[i].setSelected(false);
+		}
 
-        btnProxima.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                proximaQuestao();
-            }
-        });
-    }
+		grupoOpcoes.clearSelection();
+		btnAvaliar.setEnabled(true);
+		btnProxima.setEnabled(false);
+		respostaAvaliada = false;
+	}
 
-    private void carregarQuestao() {
-        if (questaoAtual >= 4) { 
-            mostrarResultadoFinal();
-            dispose();
-            return;
-        }
 
-        labelPergunta.setText(janelaPrincipal.getPergunta(questaoAtual));
-        String[] alternativas = janelaPrincipal.getAlternativas(questaoAtual);
+	// Avalia se a resposta selecionada está correta.  
+	private void avaliarResposta() {
+		if (respostaAvaliada) return;
 
-        grupoOpcoes.clearSelection();
-        for (int i = 0; i < 5; i++) {
-            opcoes[i].setText(alternativas[i]);
-            opcoes[i].setEnabled(true);
-        }
+		// Simula que a alternativa A é sempre correta (índice 0)
+		if (opcoes[0].isSelected()) {
+			acertos++;
+			JOptionPane.showMessageDialog(this, "Resposta correta!");
+		} else {
+			JOptionPane.showMessageDialog(this, "Resposta incorreta!");
+		}
 
-        respostaAvaliada = false;
-    }
+		respostaAvaliada = true;
+		btnAvaliar.setEnabled(false);
+		btnProxima.setEnabled(true);
+	}
 
-    private void avaliarResposta() {
-        if (respostaAvaliada) {
-            return; 
-        }
-
-        int respostaSelecionada = -1;
-        for (int i = 0; i < 5; i++) {
-            if (opcoes[i].isSelected()) {
-                respostaSelecionada = i;
-                break;
-            }
-        }
-
-        if (respostaSelecionada == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione uma resposta primeiro!");
-            return;
-        }
-
-        int respostaCorreta = janelaPrincipal.getRespostaCorreta(questaoAtual);
-
-        Icon icone;
-        if (respostaSelecionada == respostaCorreta) {
-            acertos++;
-            icone = new ImageIcon(getClass().getResource("/atividade1/imgs/ok1.png")); 
-            JOptionPane.showMessageDialog(this, "Resposta correta!", "Resultado", JOptionPane.INFORMATION_MESSAGE, icone);
-        } else {
-            icone = new ImageIcon(getClass().getResource("/atividade1/imgs/clean.png")); 
-            JOptionPane.showMessageDialog(this, "Resposta errada!", "Resultado", JOptionPane.ERROR_MESSAGE, icone);
-        }
-
-        for (JRadioButton botao : opcoes) {
-            botao.setEnabled(false);
-        }
-        respostaAvaliada = true;
-    }
-
-    private void proximaQuestao() {
-        if (!respostaAvaliada) {
-            JOptionPane.showMessageDialog(this, "Avalie a resposta antes de passar para a próxima pergunta!");
-            return;
-        }
-        questaoAtual++;
-        carregarQuestao();
-    }
-
-    private void mostrarResultadoFinal() {
-        Icon icone = new ImageIcon(getClass().getResource("/atividade1/imgs/informacao.png"));
-        JOptionPane.showMessageDialog(this, "Você acertou " + acertos + " de 4 questões!", "Resultado Final", JOptionPane.INFORMATION_MESSAGE, icone);
-    }
+	
+	//Passa para a próxima pergunta ou finaliza o quiz.
+	private void proximaQuestao() {
+		questaoAtual++;
+		if (questaoAtual < 3) {
+			carregarQuestao();
+		} else {
+			JOptionPane.showMessageDialog(this, "Você acertou " + acertos + " de 3 perguntas.");
+			dispose();
+		}
+	}
 }
